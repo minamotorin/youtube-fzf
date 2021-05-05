@@ -82,10 +82,10 @@ videos(){
     .tabRenderer.content.sectionListRenderer.contents[]?
     .itemSectionRenderer.contents[]?
     .gridRenderer.items[:-1][]?
-    .gridVideoRenderer |
-    select(.videoId) |
+    .gridVideoRenderer                                                 |
+    select(.videoId)                                                   |
       {
-        ("https://www.youtube.com/watch?v=" + .videoId) :
+        ("https://www.youtube.com/watch?v=" + .videoId):
         .title.accessibility.accessibilityData.label
       }
   '
@@ -138,7 +138,7 @@ videos(){
       .gridVideoRenderer                                               |
       select(.videoId)                                                 |
         {
-          ("https://www.youtube.com/watch?v=" + .videoId) :
+          ("https://www.youtube.com/watch?v=" + .videoId):
           .title.accessibility.accessibilityData.label
         }
     '
@@ -192,7 +192,7 @@ channels(){
     .gridChannelRenderer                                               |
     select(.channelId)                                                 |
       {
-        ("https://www.youtube.com/channel/" + .channelId) :
+        ("https://www.youtube.com/channel/" + .channelId):
         .title.simpleText
       }
   '
@@ -243,7 +243,7 @@ channels(){
       .gridChannelRenderer                                             |
       select(.channelId)                                               |
         {
-          ("https://www.youtube.com/channel/" + .channelId) :
+          ("https://www.youtube.com/channel/" + .channelId):
           .title.simpleText
         }
     '
@@ -320,7 +320,7 @@ watch(){
       .endScreenVideoRenderer                                          |
       select(.videoId)                                                 |
         {
-          ("https://www.youtube.com/watch?v=" + .videoId) :
+          ("https://www.youtube.com/watch?v=" + .videoId):
           .title.accessibility.accessibilityData.label
         }
     )
@@ -449,7 +449,7 @@ search(){
     .videoRenderer                                                     |
     select(.videoId)                                                   |
       {
-        ("https://www.youtube.com/watch?v=" + .videoId) :
+        ("https://www.youtube.com/watch?v=" + .videoId):
         .title.accessibility.accessibilityData.label
       }
   '
