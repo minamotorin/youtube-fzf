@@ -28,7 +28,8 @@
 #   --comments URS		Video‘s comments (depend on youtube-comment-downloader)
 #   -v, --fzf-videos HEADER	fzf mode for list of video‘s url
 #   -c, --fzf-channels HEADER	fzf mode for list of channel‘s url
-#   -s, --search WORDS		Search videos from words
+#   -q, --query WORDS		Search videos from words
+#   -s, --search WORDS		Search videos from words and select in fzf mode
 #   -V, --version			Show version information
 #   -h, --help			Show this help
 # 
@@ -47,7 +48,7 @@
 #   ctrl-o			open channel
 #   ctrl-s			suggested channels
 # 
-#   Run \`man fzf' and get more informations.
+#   Run `man fzf' and get more informations.
 ####################
 
 videos(){
