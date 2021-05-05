@@ -2,7 +2,7 @@
 
 ####################
 # youtube-fzf: Browse YouTube in CLI with fzf without YouTube Data API.
-# version: 1.0
+# version: 1.1
 # repository: https://github.com/minamotorin/youtube-fzf
 # License: GNU General Public License 3
 # Depndencies:
@@ -11,6 +11,7 @@
 #   - fzf
 #   - jq
 #   - mpv player
+#   - youtube-dl
 #   - youtube-comment-downloader
 # 
 # Subscribed channels database is value of YOUTUBE_FZF_DATABASE environmental valuables
@@ -380,6 +381,7 @@ fzf_videos(){
   header="$1"
 
   export FZF_DEFAULT_OPTS="
+    $FZF_DEFAULT_OPTS
     --border
     --ansi
     --bind 'ctrl-s:execute(\"$0\" --comments {} | less -f)'
@@ -406,6 +408,7 @@ fzf_channels(){
   header="$1"
 
   export FZF_DEFAULT_OPTS="
+    $FZF_DEFAULT_OPTS
     --ansi
     --bind 'ctrl-o:execute(\"$0\" --videos -a {} | \"$0\" --fzf-videos {})'
     --bind 'ctrl-s:execute(\"$0\" --channels {} | sed \"s/{//; s/}.*//\" | \"$0\" --fzf-channels {})'
@@ -498,17 +501,20 @@ main(){
       fzf_channels "$@"                                               ;;
     -s|--search)
       search "$@" | fzf_videos                                        ;;
+    -q|--query)
+      search "$@"                                                     ;;
     '')
       cat "$database" | fzf_channels "$database"                      ;;
     -V|--version)
       cat <<EOF
-1.0
+1.1
 EOF
                                                                       ;;
     -h|--help)
       cat <<EOF
-youtube-fzf: Browse YouTube in CLI with fzf without YouTube Data API.
-https://github.com/minamotorin/youtube-fzf
+youtube-fzf:  Browse YouTube in CLI with fzf without YouTube Data API.
+Repository:   https://github.com/minamotorin/youtube-fzf
+License:      GNU General Public Lisence 3
 
 Subscribed channels database (value of YOUTUBE_FZF_DATABASE environmental valuables): $database
 
@@ -524,7 +530,8 @@ Options:
   --comments URS		Video‘s comments (depend on youtube-comment-downloader)
   -v, --fzf-videos HEADER	fzf mode for list of video‘s url
   -c, --fzf-channels HEADER	fzf mode for list of channel‘s url
-  -s, --search WORDS		Search videos from words
+  -q, --query WORDS		Search videos from words
+  -s, --search WORDS		Search videos from words and select in fzf mode
   -V, --version			Show version information
   -h, --help			Show this help
 
