@@ -127,7 +127,7 @@ videos(){
       -H 'sec-fetch-mode: same-origin' \
       -H 'sec-fetch-dest: empty' \
       -H 'referer: https://www.youtube.com/channel/'"$channel"'/videos' \
-      --data-raw '{"context":{"client":{"visitorData":"","userAgent":"","clientName":"WEB","clientVersion":"2.20210429.07.00","originalUrl":"https://www.youtube.com/channel/'"$channel"'/videos","platform":"DESKTOP","clientFormFactor":"UNKNOWN_FORM_FACTOR","screenDensityFloat":1.5,"userInterfaceTheme":"USER_INTERFACE_THEME_DARK","connectionType":"CONN_CELLULAR_4G","mainAppWebInfo":{"graftUrl":"https://www.youtube.com/channel/'"$channel"'/videos","webDisplayMode":"WEB_DISPLAY_MODE_BROWSER"}},"user":{"lockedSafetyMode":false},"request":{"useSsl":true,"internalExperimentFlags":[],"consistencyTokenJars":[]},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"continuation":"'"$1"'"}' \
+      --data-raw '{"context":{"client":{"visitorData":"","userAgent":"","clientName":"WEB","clientVersion":"2.20210429.07.00","originalUrl":"https://www.youtube.com/channel/'"$channel"'/videos","platform":"DESKTOP","clientFormFactor":"UNKNOWN_FORM_FACTOR","userInterfaceTheme":"USER_INTERFACE_THEME_DARK","connectionType":"CONN_CELLULAR_4G","mainAppWebInfo":{"graftUrl":"https://www.youtube.com/channel/'"$channel"'/videos","webDisplayMode":"WEB_DISPLAY_MODE_BROWSER"}},"user":{"lockedSafetyMode":false},"request":{"useSsl":true,"internalExperimentFlags":[],"consistencyTokenJars":[]},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"continuation":"'"$1"'"}' \
       --compressed                                                     |
     tee "$tmpfile"                                                     |
     jq -c '
