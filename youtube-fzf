@@ -2,7 +2,7 @@
 
 ####################
 # youtube-fzf: Browse YouTube in CLI with fzf without YouTube Data API.
-# Version: 1.1
+# Version: 1.2
 # Repository: https://github.com/minamotorin/youtube-fzf
 # License: GNU General Public License 3
 # Depndencies:
@@ -334,19 +334,18 @@ watch(){
       }
   '                                                                    |
   jq -c '
-    {
-      "Ads" :
-        (
-          [
-            .adPlacements[]?
-            .adPlacementRenderer.renderer .actionCompanionAdRenderer.adVideoId
-          ]                                                            |
-          sort                                                         |
-          unique                                                       |
-          .[1:]                                                        |
-          map(sub("^"; "https://www.youtube.com/watch?v="))
-        )
-    }
+    (
+      [
+        .adPlacements[]?
+        .adPlacementRenderer.renderer .actionCompanionAdRenderer.adVideoId
+      ]                                                                |
+      sort                                                             |
+      unique                                                           |
+      .[1:]                                                            |
+      map(sub("^"; "https://www.youtube.com/watch?v="))                |
+      .[]                                                              |
+      {(.): "Ads"}
+    )
   '
 }
 
@@ -385,16 +384,16 @@ fzf_videos(){
     $FZF_DEFAULT_OPTS
     --border
     --ansi
-    --bind 'ctrl-s:execute(\"$0\" --comments {} | less -f)'
-    --bind 'ctrl-o:execute(\"$0\" --watch {} | sed \"1,3d; \\\$d\" | \"$0\" --fzf-videos)'
-    --bind 'ctrl-u:execute(\"$0\" --watch {} | sed \"3!d; s/.*{//; s/}}//; s/[^,hp]*[^s]://g; s/,/, /g\" | \"$0\" --fzf-channels)'
+    --bind 'ctrl-s:execute(sh \"$0\" --comments {} | less -f)'
+    --bind 'ctrl-o:execute(sh \"$0\" --watch {} | sed \"1,3d\" | sh \"$0\" --fzf-videos)'
+    --bind 'ctrl-u:execute(sh \"$0\" --watch {} | sed \"3!d; s/.*{//; s/}}//; s/[^,hp]*[^s]://g; s/,/, /g\" | sh \"$0\" --fzf-channels)'
     --bind 'ctrl-y:execute-silent(echo -n \"{}\" | pbcopy)+abort'
     --preview-window up:70%:hidden:wrap
     --bind ctrl-w:'execute(mpv \"\$( echo {} | sed "\"'s/{\"//; s/\".*//'\"")\")'
     --bind 'ctrl-t:toggle-preview'
     --bind up:page-up
     --bind down:page-down
-    --preview \"$0\"\ --watch\ \"{}\"
+    --preview sh\ \"$0\"\ --watch\ \"{}\"
 "
 
   fzf --header="$header"
@@ -411,14 +410,14 @@ fzf_channels(){
   export FZF_DEFAULT_OPTS="
     $FZF_DEFAULT_OPTS
     --ansi
-    --bind 'ctrl-o:execute(\"$0\" --videos -a {} | \"$0\" --fzf-videos {})'
-    --bind 'ctrl-s:execute(\"$0\" --channels {} | sed \"s/{//; s/}.*//\" | \"$0\" --fzf-channels {})'
+    --bind 'ctrl-o:execute(sh \"$0\" --videos -a {} | sh \"$0\" --fzf-videos {})'
+    --bind 'ctrl-s:execute(sh \"$0\" --channels {} | sed \"s/{//; s/}.*//\" | sh \"$0\" --fzf-channels {})'
     --bind 'ctrl-y:execute-silent(echo -n \"{}\" | pbcopy)+abort'
     --preview-window up:70%:hidden:wrap
     --bind 'ctrl-t:toggle-preview'
     --bind up:page-up
     --bind down:page-down
-    --preview \"$0\"\ --videos\ \"{}\"
+    --preview sh\ \"$0\"\ --videos\ \"{}\"
   "
 
   fzf --header="$header"
@@ -459,7 +458,7 @@ search(){
 main(){
 
   if ! echo "$0" | grep -q '^/'; then
-    "`pwd`"/"$0" "$@"
+    sh "`pwd`"/"$0" "$@"
     exit
   fi
 
@@ -508,7 +507,7 @@ main(){
       cat "$database" | fzf_channels "$database"                      ;;
     -V|--version)
       cat <<EOF
-1.1
+1.2
 EOF
                                                                       ;;
     -h|--help)
