@@ -1,0 +1,555 @@
+#!/bin/sh
+
+####################
+# youtube-fzf: Browse YouTube in CLI with fzf without YouTube Data API.
+# version: 1.0
+# repository: https://github.com/minamotorin/youtube-fzf
+# License: GNU General Public License 3
+# Depndencies:
+#   - sh
+#   - curl
+#   - fzf
+#   - jq
+#   - mpv player
+#   - youtube-comment-downloader
+# 
+# Subscribed channels database is value of YOUTUBE_FZF_DATABASE environmental valuables
+# 
+# Usage:
+#   youtube-fzf
+#      Read from subscribed channels database
+#   youtube-fzf [OPTIONS]
+# 
+# Options:
+#   --videos URL			Channel‘s videos
+#   --channels URL		Channel‘s urls
+#   --watch URL			Video‘s information
+#   --comments URS		Video‘s comments (depend on youtube-comment-downloader)
+#   -v, --fzf-videos HEADER	fzf mode for list of video‘s url
+#   -c, --fzf-channels HEADER	fzf mode for list of channel‘s url
+#   -s, --search WORDS		Search videos from words
+#   -V, --version			Show version information
+#   -h, --help			Show this help
+# 
+# fzf:
+#   ctrl-t			toggle-preview
+#   ctrl-w			yank (work on only macOS)
+#   up				page-up
+#   down				page-down
+# 
+# fzf-videos:
+#   ctrl-o			other videos
+#   ctrl-s			show comments
+#   ctrl-u			uploader information
+# 
+# fzf-channels:
+#   ctrl-o			open channel
+#   ctrl-s			suggested channels
+# 
+#   Run \`man fzf' and get more informations.
+####################
+
+videos(){
+
+  #
+  # videos 'https://www.youtube.com/channel/{id}' [-a]
+  # -a: all
+  #
+
+  url="$1"/videos
+  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+  channel="$(echo "$url" | sed -n '
+    \!^https://www.youtube.com/channel/\([^/]*\)/videos$! {
+        s//\1/
+        p
+      }
+  ')"
+  if [ "$channel" = '' ]; then exit 2; fi
+
+  curl -s "$url"                                                       |
+  tee "$tmpfile"                                                       |
+  sed -n '
+    /.*\({"responseContext".*}\);<\/script>.*/ {
+        s//\1/
+        p
+        q
+      }
+  '                                                                    |
+  jq -c '
+    .contents.twoColumnBrowseResultsRenderer.tabs[]?
+    .tabRenderer.content.sectionListRenderer.contents[]?
+    .itemSectionRenderer.contents[]?
+    .gridRenderer.items[:-1][]?
+    .gridVideoRenderer |
+    select(.videoId) |
+      {
+        ("https://www.youtube.com/watch?v=" + .videoId) :
+        .title.accessibility.accessibilityData.label
+      }
+  '
+  token="$(
+    cat "$tmpfile"                                                     |
+    sed -n '
+      /.*\({"responseContext".*}\);<\/script>.*/ {
+          s//\1/
+          p
+          q
+        }
+      '                                                                |
+    jq -r '
+      .contents.twoColumnBrowseResultsRenderer.tabs[]?
+      .tabRenderer.content.sectionListRenderer.contents[]?
+      .itemSectionRenderer.contents[]?
+      .gridRenderer.items[-1].continuationItemRenderer.continuationEndpoint.continuationCommand.token
+    ' 
+  )"
+
+  if ! [ "$2" = '-a' ]; then return; fi
+
+  callapi() {
+
+    #
+    # callapi 'toke'
+    #
+
+    if [ "$token" = '' ]; then return; fi
+    tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+
+    curl -s 'https://www.youtube.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8' \
+      -H 'authority: www.youtube.com' \
+      -H 'x-youtube-client-name: 1' \
+      -H 'x-youtube-client-version: 2.20210429.07.00' \
+      -H 'content-type: application/json' \
+      -H 'accept: */*' \
+      -H 'sec-gpc: 1' \
+      -H 'origin: https://www.youtube.com' \
+      -H 'sec-fetch-site: same-origin' \
+      -H 'sec-fetch-mode: same-origin' \
+      -H 'sec-fetch-dest: empty' \
+      -H 'referer: https://www.youtube.com/channel/'"$channel"'/videos' \
+      --data-raw '{"context":{"client":{"visitorData":"","userAgent":"","clientName":"WEB","clientVersion":"2.20210429.07.00","originalUrl":"https://www.youtube.com/channel/'"$channel"'/videos","platform":"DESKTOP","clientFormFactor":"UNKNOWN_FORM_FACTOR","screenDensityFloat":1.5,"userInterfaceTheme":"USER_INTERFACE_THEME_DARK","connectionType":"CONN_CELLULAR_4G","mainAppWebInfo":{"graftUrl":"https://www.youtube.com/channel/'"$channel"'/videos","webDisplayMode":"WEB_DISPLAY_MODE_BROWSER"}},"user":{"lockedSafetyMode":false},"request":{"useSsl":true,"internalExperimentFlags":[],"consistencyTokenJars":[]},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"continuation":"'"$1"'"}' \
+      --compressed                                                     |
+    tee "$tmpfile"                                                     |
+    jq -c '
+      .onResponseReceivedActions[]?
+      .appendContinuationItemsAction.continuationItems[]?
+      .gridVideoRenderer                                               |
+      select(.videoId)                                                 |
+        {
+          ("https://www.youtube.com/watch?v=" + .videoId) :
+          .title.accessibility.accessibilityData.label
+        }
+    '
+    token="$(
+      cat "$tmpfile"                                                   |
+      jq -r '
+        .onResponseReceivedActions[]?
+        .appendContinuationItemsAction.continuationItems[-1].continuationItemRenderer.continuationEndpoint.continuationCommand.token
+      '
+    )"
+  }
+
+  if [ "$token" = '' ]; then return; fi
+  while sleep 1; do
+    callapi "$token"
+    if [ "$token" = '' ]; then return; fi
+  done
+
+}
+
+channels(){
+
+  #
+  # channels 'https://www.youtube.com/channel/{id}'
+  #
+
+  url="$1"/channels
+  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+  channel="$(echo "$url" | sed -n '
+    \!^https://www.youtube.com/channel/\([^/]*\)/channels$! {
+        s//\1/
+        p
+      }
+  ')"
+  if [ "$channel" = '' ]; then exit 3; fi
+
+  curl -s "$url"                                                       |
+  tee "$tmpfile"                                                       |
+  sed -n '
+    /.*\({"responseContext".*}\);<\/script>.*/ {
+        s//\1/
+        p
+        q
+      }
+  '                                                                    |
+  jq -c '
+    .contents.twoColumnBrowseResultsRenderer.tabs[]
+    .tabRenderer.content.sectionListRenderer.contents[]?
+    .itemSectionRenderer.contents[]?
+    .gridRenderer.items[]?
+    .gridChannelRenderer                                               |
+    select(.channelId)                                                 |
+      {
+        ("https://www.youtube.com/channel/" + .channelId) :
+        .title.simpleText
+      }
+  '
+
+  token="$(
+    cat "$tmpfile"                                                     |
+    sed -n '
+      /.*\({"responseContext".*}\);<\/script>.*/ {
+          s//\1/
+          p
+          q
+        }
+    '                                                                  |
+    jq -r '
+      .contents.twoColumnBrowseResultsRenderer.tabs[]?
+      .tabRenderer.content.sectionListRenderer.contents[]?
+      .itemSectionRenderer.contents[]?
+      .gridRenderer.items[-1].continuationItemRenderer.continuationEndpoint.continuationCommand.token
+    '
+  )"
+
+  callapi () {
+
+    #
+    # callapi 'token'
+    #
+
+    tmpfile="`echo "$url" | tr '/' '_'`""`date +%Y%m%d%H%M%S`"
+
+    curl -s 'https://www.youtube.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8' \
+      -H 'authority: www.youtube.com' \
+      -H 'x-youtube-client-name: 1' \
+      -H 'x-youtube-client-version: 2.20210429.07.00' \
+      -H 'content-type: application/json' \
+      -H 'accept: */*' \
+      -H 'sec-gpc: 1' \
+      -H 'origin: https://www.youtube.com' \
+      -H 'sec-fetch-site: same-origin' \
+      -H 'sec-fetch-mode: same-origin' \
+      -H 'sec-fetch-dest: empty' \
+      -H 'referer: https://www.youtube.com/channel/'"$channel"'/channels' \
+      --data-raw '{"context":{"client":{"visitorData":"","userAgent":"","clientName":"WEB","clientVersion":"2.20210429.07.00","originalUrl":"https://www.youtube.com/channel/'"$channel"'/videos","clientFormFactor":"UNKNOWN_FORM_FACTOR","userInterfaceTheme":"USER_INTERFACE_THEME_DARK","connectionType":"CONN_CELLULAR_3G","mainAppWebInfo":{"graftUrl":"https://www.youtube.com/channel/'"$channel"'/channels","webDisplayMode":"WEB_DISPLAY_MODE_BROWSER"}},"user":{"lockedSafetyMode":false},"request":{"useSsl":true,"internalExperimentFlags":[],"consistencyTokenJars":[]},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"continuation":"'"$token"'"}' \
+      --compressed                                                     |
+    tee "$tmpfile"                                                     |
+    jq -c '
+      .onResponseReceivedActions[]?
+      .appendContinuationItemsAction.continuationItems[]?
+      .gridChannelRenderer                                             |
+      select(.channelId)                                               |
+        {
+          ("https://www.youtube.com/channel/" + .channelId) :
+          .title.simpleText
+        }
+    '
+
+    token="$(
+      cat "$tmpfile" |
+      jq -r '
+        .onResponseReceivedActions[]?
+        .appendContinuationItemsAction.continuationItems[-1].continuationItemRenderer.continuationEndpoint.continuationCommand.token
+      '
+    )"
+  }
+
+  if [ "$token" = '' ]; then return; fi
+  while sleep 1; do
+    callapi "$token"
+    if [ "$token" = '' ]; then return; fi
+  done
+}
+
+watch(){
+
+  #
+  # watch 'https://www.youtube.com/watch?v={id}'
+  #
+
+  url="$1"
+  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+  curl -s "$url" -o "$tmpfile"
+  cat "$tmpfile" |
+  sed -n '
+    /.*\({"responseContext".*}\);<\/script>.*/ {
+        s//\1/
+        h
+      }
+    $x; $p
+  '                                                                    |
+  jq -c '
+    (
+      .contents.twoColumnWatchNextResults.results.results.contents     |
+      (
+        .[0]                                                           |
+          {
+            title: .videoPrimaryInfoRenderer.title.runs[0].text,
+            viewCount: .videoPrimaryInfoRenderer.viewCount.videoViewCountRenderer.viewCount.simpleText,
+            tooltip: .videoPrimaryInfoRenderer.sentimentBar.sentimentBarRenderer.tooltip,
+            data: .videoPrimaryInfoRenderer.dateText.simpleText,
+            status: .videoPrimaryInfoRenderer.badges[0].metadataBadgeRenderer.label
+          }
+      )
+    ,
+      (
+        .[1]                                                           |
+        {
+          channel: 
+            (
+              .videoSecondaryInfoRenderer.owner.videoOwnerRenderer     |
+              {
+                url: .title.runs[0].navigationEndpoint.browseEndpoint.canonicalBaseUrl | sub("^"; "https://www.youtube.com"),
+                text: .title.runs[0].text,
+                subscribe: .subscriberCountText.simpleText
+              }
+            )
+        }
+      ,
+        {
+          description: [.videoSecondaryInfoRenderer.description.runs[]?.text] | join("")
+        }
+      )
+    )
+  ,
+    (
+      .playerOverlays.playerOverlayRenderer.endScreen.watchNextEndScreenRenderer.results[]?
+      .endScreenVideoRenderer                                          |
+      select(.videoId)                                                 |
+        {
+          ("https://www.youtube.com/watch?v=" + .videoId) :
+          .title.accessibility.accessibilityData.label
+        }
+    )
+  '
+  cat "$tmpfile"                                                       |
+  sed -n '
+    /.*\({"responseContext".*}\);<\/script>.*/ {
+        s//\1/
+        p
+        q
+      }
+  '                                                                    |
+  jq -c '
+    {
+      "Ads" :
+        (
+          [
+            .adPlacements[]?
+            .adPlacementRenderer.renderer .actionCompanionAdRenderer.adVideoId
+          ]                                                            |
+          sort                                                         |
+          unique                                                       |
+          .[1:]                                                        |
+          map(sub("^"; "https://www.youtube.com/watch?v="))
+        )
+    }
+  '
+}
+
+comments(){
+
+  #
+  # comments 'https://www.youtube.com/watch?v={id}'
+  #
+
+  id="$(echo "$1" | sed 's!^https://www.youtube.com/watch?v=!!')"
+  tmpfile="$(echo "$id" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+
+  youtube-comment-downloader --youtubeid="$id" --output="$tmpfile" > /dev/null || return&
+  # Depend on youtube-comment-downloader: https://github.com/egbertbouman/youtube-comment-downloader
+  # pip install https://github.com/egbertbouman/youtube-comment-downloader/archive/master.zip
+
+  limit=20
+  until [ -e "$tmpfile" ]; do
+    sleep 3
+    limit=$((limit-1))
+    [ "$limit" = 0 ] && break
+  done
+
+  less -F -- "$tmpfile"
+}
+
+fzf_videos(){
+
+  #
+  # fzf-videos 'header'
+  #
+
+  header="$1"
+
+  export FZF_DEFAULT_OPTS="
+    --border
+    --ansi
+    --bind 'ctrl-s:execute(\"$0\" --comments {} | less -f)'
+    --bind 'ctrl-o:execute(\"$0\" --watch {} | sed \"1,3d; \\\$d\" | \"$0\" --fzf-videos)'
+    --bind 'ctrl-u:execute(\"$0\" --watch {} | sed \"3!d; s/.*{//; s/}}//; s/[^,hp]*[^s]://g; s/,/, /g\" | \"$0\" --fzf-channels)'
+    --bind 'ctrl-y:execute-silent(echo -n \"{}\" | pbcopy)+abort'
+    --preview-window up:70%:hidden:wrap
+    --bind ctrl-w:'execute(mpv \"\$( echo {} | sed "\"'s/{\"//; s/\".*//'\"")\")'
+    --bind 'ctrl-t:toggle-preview'
+    --bind up:page-up
+    --bind down:page-down
+    --preview \"$0\"\ --watch\ \"{}\"
+"
+
+  fzf --header="$header"
+
+}
+
+fzf_channels(){
+  
+  # fzf-channels 'header'
+  #
+
+  header="$1"
+
+  export FZF_DEFAULT_OPTS="
+    --ansi
+    --bind 'ctrl-o:execute(\"$0\" --videos -a {} | \"$0\" --fzf-videos {})'
+    --bind 'ctrl-s:execute(\"$0\" --channels {} | sed \"s/{//; s/}.*//\" | \"$0\" --fzf-channels {})'
+    --bind 'ctrl-y:execute-silent(echo -n \"{}\" | pbcopy)+abort'
+    --preview-window up:70%:hidden:wrap
+    --bind 'ctrl-t:toggle-preview'
+    --bind up:page-up
+    --bind down:page-down
+    --preview \"$0\"\ --videos\ \"{}\"
+  "
+
+  fzf --header="$header"
+
+}
+
+search(){
+
+  #
+  # search words
+  #
+
+  url='https://www.youtube.com/results?search_query='"$(echo "$@" | jq -sRr @uri)"
+  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+
+  curl -s "$url"                                                       |
+  tee "$tmpfile"                                                       |
+  sed -n '
+    /.*\({"respon.*}\);.*/ {
+        s//\1/
+        p
+        q
+      }
+  '                                                                    |
+  jq -c '
+    .contents.twoColumnSearchResultsRenderer.primaryContents.sectionListRenderer.contents[]?
+    .itemSectionRenderer.contents[]?
+    .videoRenderer                                                     |
+    select(.videoId)                                                   |
+      {
+        ("https://www.youtube.com/watch?v=" + .videoId) :
+        .title.accessibility.accessibilityData.label
+      }
+  '
+
+}
+
+main(){
+
+  if ! echo "$0" | grep -q '^/'; then
+    "`pwd`"/"$0" "$@"
+    exit
+  fi
+
+  database="${YOUTUBE_FZF_DATABASE:-/dev/stdin}"
+  if ! echo "$database" | grep -q '^/'; then
+    database="`pwd`"/"$database"
+  fi
+  tmp_dir="$(mktemp -dt "`basename $0`")" || exit 1
+  cd "$tmp_dir" || exit 4
+
+  option="$1"
+  shift
+  if [ "$1" = '-a' ]; then
+    videos_option='-a'
+    shift
+  fi
+  url="` echo "$@" | sed '
+    s/{//
+    s/^"//
+    s/,.*//
+    s/".*//
+  '`"
+
+  case "$option" in
+    --videos)
+      if ! [ "$videos_option" = '-a' ]; then
+        echo "$@"
+      fi
+      videos "$url" "$videos_option"                                  ;;
+    --channels)
+      channels "$url"                                                 ;;
+    --watch)
+      echo "$@"
+      watch "$url"                                                    ;;
+    --comments)
+      comments "$url"                                                 ;;
+    --fzf-videos|-v)
+      fzf_videos "$@"                                                 ;;
+    --fzf-channels|-c)
+      fzf_channels "$@"                                               ;;
+    -s|--search)
+      search "$@" | fzf_videos                                        ;;
+    '')
+      cat "$database" | fzf_channels "$database"                      ;;
+    -V|--version)
+      cat <<EOF
+1.0
+EOF
+                                                                      ;;
+    -h|--help)
+      cat <<EOF
+youtube-fzf: Browse YouTube in CLI with fzf without YouTube Data API.
+https://github.com/minamotorin/youtube-fzf
+
+Subscribed channels database (value of YOUTUBE_FZF_DATABASE environmental valuables): $database
+
+Usage:
+  `basename "$0"`
+     Read from subscribed channels database
+  `basename "$0"` [OPTIONS]
+
+Options:
+  --videos URL			Channel‘s videos
+  --channels URL		Channel‘s urls
+  --watch URL			Video‘s information
+  --comments URS		Video‘s comments (depend on youtube-comment-downloader)
+  -v, --fzf-videos HEADER	fzf mode for list of video‘s url
+  -c, --fzf-channels HEADER	fzf mode for list of channel‘s url
+  -s, --search WORDS		Search videos from words
+  -V, --version			Show version information
+  -h, --help			Show this help
+
+fzf:
+  ctrl-t			toggle-preview
+  ctrl-w			yank (work on only macOS)
+  up				page-up
+  down				page-down
+
+fzf-videos:
+  ctrl-o			other videos
+  ctrl-s			show comments
+  ctrl-u			uploader information
+
+fzf-channels:
+  ctrl-o			open channel
+  ctrl-s			suggested channels
+
+  Run \`man fzf' and get more informations.
+EOF
+                                                                      ;;
+    *)
+      echo "Illega option: $option" >&2
+      exit 1                                                          ;;
+  esac
+}
+
+main "$@"
