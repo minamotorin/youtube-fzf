@@ -2,17 +2,17 @@
 
 ####################
 # youtube-fzf: Browse YouTube in CLI with fzf without YouTube Data API.
-# Version: 1.2
+# Version: 1.3
 # Repository: https://github.com/minamotorin/youtube-fzf
-# License: GNU General Public License 3
+# License: GNU General Public License Version 3 (https://www.gnu.org/licenses/gpl-3.0.html)
 # Depndencies:
-#   - sh
-#   - curl
-#   - fzf
-#   - jq
-#   - mpv player
-#   - youtube-dl
-#   - youtube-comment-downloader
+#   - Bourne Shell
+#   - curl (https://curl.se/)
+#   - fzf (https://github.com/junegunn/fzf)
+#   - jq (https://stedolan.github.io/jq/)
+#   - mpv (https://mpv.io/)
+#   - youtube-dl (https://youtube-dl.org/)
+#   - youtube-comment-downloader (https://github.com/egbertbouman/youtube-comment-downloader)
 # 
 # Subscribed channels database is value of YOUTUBE_FZF_DATABASE environmental valuables
 # 
@@ -482,6 +482,22 @@ main(){
     s/,.*//
     s/".*//
   '`"
+  if echo "$url" | grep -q -e 'youtube.com/c/' -e 'youtube.com/user/'; then
+    tmpfile="$(echo "$url" | tr '/' ':')""`date +%Y%m%d%H%M%S`"
+    url='https://www.youtube.com/channel/'"$(
+      curl -s "$url"                                                     |
+      tee "$tmpfile"                                                   |
+      sed -n '
+        /.*\({"respon.*}\);.*/ {
+          s//\1/
+          p
+          q
+        }
+      '                                                                |
+      jq -r '.header.c4TabbedHeaderRenderer.channelId'
+    )"
+    sleep 1
+  fi
 
   case "$option" in
     --videos)
@@ -508,16 +524,18 @@ main(){
       cat "$database" | fzf_channels "$database"                      ;;
     -V|--version)
       cat <<EOF
-1.2
+1.3
 EOF
                                                                       ;;
     -h|--help)
       cat <<EOF
 youtube-fzf:  Browse YouTube in CLI with fzf without YouTube Data API.
 Repository:   https://github.com/minamotorin/youtube-fzf
-License:      GNU General Public Lisence 3
+License:      GNU General Public Lisence Version 3
+              https://www.gnu.org/licenses/gpl-3.0.html
 
-Subscribed channels database (value of YOUTUBE_FZF_DATABASE environmental valuables): $database
+Subscribed channels database (value of YOUTUBE_FZF_DATABASE environmental valuables):
+  $database
 
 Usage:
   `basename "$0"`
@@ -537,19 +555,20 @@ Options:
   -h, --help			Show this help
 
 fzf:
-  ctrl-t			toggle-preview
-  ctrl-w			yank (work on only macOS)
-  up				page-up
-  down				page-down
+  ctrl-t			Toggle-preview
+  ctrl-y			Yank (work on only macOS now)
+  up				Page-up
+  down				Page-down
 
 fzf-videos:
-  ctrl-o			other videos
-  ctrl-s			show comments
-  ctrl-u			uploader information
+  ctrl-o			Other videos
+  ctrl-s			Show comments
+  ctrl-u			Uploader information
+  ctrl-w			Watch video with mpv
 
 fzf-channels:
-  ctrl-o			open channel
-  ctrl-s			suggested channels
+  ctrl-o			Open channel
+  ctrl-s			Suggested channels
 
   Run \`man fzf' and get more informations.
 EOF
