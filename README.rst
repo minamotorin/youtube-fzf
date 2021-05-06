@@ -142,7 +142,7 @@ TODO
   - More Similar Projects (other than shell scripts)
   - More TODO
   
-- Make logo
+- Make logo image
 - Yank in multi-platform
 - More options
 - More search results
