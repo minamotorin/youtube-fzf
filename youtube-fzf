@@ -382,8 +382,8 @@ fzf_videos(){
 
   export FZF_DEFAULT_OPTS="
     $FZF_DEFAULT_OPTS
-    --border
     --ansi
+    --no-sort
     --bind 'ctrl-s:execute(sh \"$0\" --comments {} | less -f)'
     --bind 'ctrl-o:execute(sh \"$0\" --watch {} | sed \"1,3d\" | sh \"$0\" --fzf-videos)'
     --bind 'ctrl-u:execute(sh \"$0\" --watch {} | sed \"3!d; s/.*{//; s/}}//; s/[^,hp]*[^s]://g; s/,/, /g\" | sh \"$0\" --fzf-channels)'
@@ -410,6 +410,7 @@ fzf_channels(){
   export FZF_DEFAULT_OPTS="
     $FZF_DEFAULT_OPTS
     --ansi
+    --no-sort
     --bind 'ctrl-o:execute(sh \"$0\" --videos -a {} | sh \"$0\" --fzf-videos {})'
     --bind 'ctrl-s:execute(sh \"$0\" --channels {} | sed \"s/{//; s/}.*//\" | sh \"$0\" --fzf-channels {})'
     --bind 'ctrl-y:execute-silent(echo -n \"{}\" | pbcopy)+abort'
