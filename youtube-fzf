@@ -34,19 +34,20 @@
 #   -h, --help			Show this help
 # 
 # fzf:
-#   ctrl-t			toggle-preview
-#   ctrl-w			yank (work on only macOS)
-#   up				page-up
-#   down			page-down
+#   ctrl-t			Toggle-preview
+#   ctrl-y			Yank (work on only macOS now)
+#   up				Page-up
+#   down			Page-down
 # 
 # fzf-videos:
-#   ctrl-o			other videos
-#   ctrl-s			show comments
-#   ctrl-u			uploader information
+#   ctrl-o			Other videos
+#   ctrl-s			Show comments
+#   ctrl-u			Uploader information
+#   ctrl-w			Watch video with mpv
 # 
 # fzf-channels:
-#   ctrl-o			open channel
-#   ctrl-s			suggested channels
+#   ctrl-o			Open channel
+#   ctrl-s			Suggested channels
 # 
 #   Run `man fzf' and get more informations.
 ####################
