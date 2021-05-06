@@ -1,4 +1,4 @@
-README version 1.3.0
+README version 1.3.1
 
 Abstract
 ########
@@ -161,4 +161,4 @@ If you find something, have any requests or questions, or report bugs, please us
 License
 #######
 
-This project is under the `GNU General Public License 3 <https://www.gnu.org/licenses/gpl-3.0.html>`_.
+This project is under the `GNU General Public License Version 3 <https://www.gnu.org/licenses/gpl-3.0.html>`_.
