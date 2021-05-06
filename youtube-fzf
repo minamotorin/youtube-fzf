@@ -22,7 +22,7 @@
 #   youtube-fzf [OPTIONS]
 # 
 # Options:
-#   --videos URL	Channel‘s videos
+#   --videos URL		Channel‘s videos
 #   --channels URL		Channel‘s urls
 #   --watch URL			Video‘s information
 #   --comments URS		Video‘s comments (depend on youtube-comment-downloader)
@@ -30,14 +30,14 @@
 #   -c, --fzf-channels HEADER	fzf mode for list of channel‘s url
 #   -q, --query WORDS		Search videos from words
 #   -s, --search WORDS		Search videos from words and select in fzf mode
-#   -V, --version	Show version information
+#   -V, --version		Show version information
 #   -h, --help			Show this help
 # 
 # fzf:
 #   ctrl-t			toggle-preview
 #   ctrl-w			yank (work on only macOS)
 #   up				page-up
-#   down		page-down
+#   down			page-down
 # 
 # fzf-videos:
 #   ctrl-o			other videos
