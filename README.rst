@@ -5,10 +5,6 @@ Abstract
 
 Browse YouTube in CLI with fzf without YouTube Data API.
 
-Description
-Background
-###
-
 NOTE
 ####
 
@@ -139,6 +135,7 @@ TODO
 
 - More detailed README
 
+  - Description or Background
   - Screenshots
   - Examples
   - Knowledge issues
