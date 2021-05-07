@@ -21,7 +21,7 @@ Usage
     :Repository:
       https://github.com/minamotorin/youtube-fzf
     :License:
-      GNU General Public Lisence 3 (https://www.gnu.org/licenses/gpl-3.0.html)
+      `GNU General Public Lisence 3 <https://www.gnu.org/licenses/gpl-3.0.html>`_
     :Subscribed channels database:
       value of YOUTUBE_FZF_DATABASE environmental valuables
     
@@ -80,40 +80,40 @@ Dependencies
 Must
 ****
 
-Bourne Shell
+:Bourne Shell:
   ``/bin/sh``
 
-`curl  <https://curl.se/>`_
+:`curl <https\://curl.se/>`_:
   For fetch YouTube API
 
-`fzf: 🌸 A command-line fuzzy finder <https://github.com/junegunn/fzf>`_
+:`fzf\: 🌸 A command-line fuzzy finder <https\://github.com/junegunn/fzf>`_:
   For filter results of videos or channels
 
-`jq: Command-line JSON processor <https://stedolan.github.io/jq/>`_
+:`jq\: Command-line JSON processor <https\://stedolan.github.io/jq/>`_:
   For parse JSON file from YouTube API
 
 Options
 *******
 
-`mpv: 🎥 Command line video player <https://mpv.io/>`_
+:`mpv\: 🎥 Command line video player <https\://mpv.io/>`_:
   For play YouTube videos
 
-`youtube-dl: Command-line program to download videos from YouTube.com and other video sites <https://youtube-dl.org/>`_
+:`youtube-dl\: Command-line program to download videos from YouTube.com and other video sites <https\://youtube-dl.org/>`_:
   For play YouTube videos with mpv
 
-`youtube-comment-downloader: Simple script for downloading Youtube comments without using the Youtube API <https://github.com/egbertbouman/youtube-comment-downloader>`_
+:`youtube-comment-downloader\: Simple script for downloading Youtube comments without using the Youtube API <https\://github.com/egbertbouman/youtube-comment-downloader>`_:
   For watch comments
 
 Q&A
 ###
 
-Why don‘t you use YouTube Data API?
+:Why don‘t you use YouTube Data API?:
   Because of freedom. Use it if you want.
 
 Reference
 #########
 
-`fzf: 🌸 A command-line fuzzy finder <https://github.com/junegunn/fzf>`_
+:`fzf\: 🌸 A command-line fuzzy finder <https\://github.com/junegunn/fzf>`_:
   Default key bindings of fzf mode
 
 Similar projects
@@ -122,10 +122,10 @@ Similar projects
 Shell Script
 ************
 
-`ytfzf <https://github.com/pystardust/ytfzf>`_
+:`ytfzf <https\://github.com/pystardust/ytfzf>`_:
   Good! Thumbnails, History, and some features will be useful. However, it seems that this script is not able to get videos from channels.
 
-`yt <https://github.com/sayan01/scripts/blob/master/yt>`_
+:`yt <https\://github.com/sayan01/scripts/blob/master/yt>`_:
   Require GNU grep but jqless. Not only channel‘s videos but also playlists. I haven‘t understood how to use.
 
 If you know other similar projects, please let‘s me know.
@@ -161,7 +161,7 @@ TODO
 Issue
 #####
 
-If you find something, have any requests or questions, or report bugs, please use `Github issues <https://github.com/minamotorin/youtube-fzf/issues>`_ feel free.
+If you find something, report bugs, or have any requests, questions, suggestations, opnions, or feedbacks, please use `Github issues <https://github.com/minamotorin/youtube-fzf/issues>`_ feel free.
 
 License
 #######
