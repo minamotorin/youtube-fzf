@@ -53,7 +53,7 @@ Usage
     :Down:
       Page-down
       
-    Run `man fzf' and get more informations.
+    Run \`man fzf' and get more informations.
 
   :fzf-videos:
     :Ctrl-o:
