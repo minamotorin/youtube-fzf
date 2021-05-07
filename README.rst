@@ -1,36 +1,41 @@
-README version 1.3.1
+README Version 1.3.2
 
 Abstract
 ########
 
 Browse YouTube in CLI with fzf without YouTube Data API.
 
+Description
+Background
+###
+
 NOTE
 ####
 
 I‘m beginner. This program will not work if YouTube changes things. And it will take long time to push fix.
 
-Some codes and English will wrong. If you find something, please use `Github issue <https://github.com/minamotorin/youtube-fzf/issues>`_ feel free.
+Some codes and English will wrong. If you find something, please use `Github issues <https://github.com/minamotorin/youtube-fzf/issues>`_ feel free.
 
 Usage
-######
+#####
 
-  About:
-    youtube-fzf:
+  :About:
+    :youtube-fzf:
       Browse YouTube in CLI with fzf without YouTube Data API.
-    Repository:
+    :Repository:
       https://github.com/minamotorin/youtube-fzf
-    License:
+    :License:
       GNU General Public Lisence 3 (https://www.gnu.org/licenses/gpl-3.0.html)
+    :Subscribed channels database:
+      value of YOUTUBE_FZF_DATABASE environmental valuables
     
-    Subscribed channels database is value of YOUTUBE_FZF_DATABASE environmental valuables
-    
-    youtube-fzf
+  :mode:
+    :youtube-fzf:
       Read from subscribed channels database
-    youtube-fzf [OPTIONS]
+    :youtube-fzf [OPTIONS]:
       Womk with option
 
-  Options:
+  :Options:
     --videos URL			Channel‘s videos
     --channels URL		Channel‘s urls
     --watch URL			Video‘s information
@@ -42,33 +47,33 @@ Usage
     -V, --version			Show version information
     -h, --help			Show this help
   
-  fzf:
-    Ctrl-t
+  :fzf:
+    :Ctrl-t:
       Toggle-preview
-    Ctrl-y
+    :Ctrl-y:
       Yank (work on only macOS now)
-    Up
+    :Up:
       Page-up
-    Down
-      Page-down    
+    :Down:
+      Page-down
+      
+    Run `man fzf' and get more informations.
 
-  fzf-videos:
-    Ctrl-o
+  :fzf-videos:
+    :Ctrl-o:
       Other videos
-    Ctrl-s
+    :Ctrl-s:
       Show comments
-    Ctrl-u
+    :Ctrl-u:
       Uploader information
-    Ctrl-w
+    :Ctrl-w:
       Watch video with mpv
 
-  fzf-channels:
-    Ctrl-o
+  :fzf-channels:
+    :Ctrl-o:
       Open channel
-    Ctrl-s
+    :Ctrl-s:
       Suggested channels
-
-    Run `man fzf' and get more informations.
 
 TODO
   More informations
@@ -136,12 +141,14 @@ TODO
 
   - Screenshots
   - Examples
-  - Knowledge issue
+  - Knowledge issues
   - More Q&A
   - More Reference
   - More Similar Projects (other than shell scripts)
   - More TODO
   
+- Use variables with ``--data-raw``
+- Automatically Usage update
 - Make logo image
 - Yank in multi-platform
 - More options
@@ -157,7 +164,7 @@ TODO
 Issue
 #####
 
-If you find something, have any requests or questions, or report bugs, please use `Github issue <https://github.com/minamotorin/youtube-fzf/issues>`_ feel free.
+If you find something, have any requests or questions, or report bugs, please use `Github issues <https://github.com/minamotorin/youtube-fzf/issues>`_ feel free.
 
 License
 #######
