@@ -122,7 +122,7 @@ Shell Script
 ************
 
 `ytfzf <https://github.com/pystardust/ytfzf>`_
-  Good! Thumbnails, History, and some features will be usefull. However, it seems that this script is not able to get videos from channels.
+  Good! Thumbnails, History, and some features will be useful. However, it seems that this script is not able to get videos from channels.
 
 `yt <https://github.com/sayan01/scripts/blob/master/yt>`_
   Require GNU grep but jqless. Not only channel‘s videos but also playlists. I haven‘t understood how to use.
