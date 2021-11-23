@@ -2,7 +2,7 @@
 
 ####################
 # youtube-fzf: Browse YouTube in CLI with fzf without YouTube Data API.
-# Version: 1.3
+# Version: 1.4
 # Repository: https://github.com/minamotorin/youtube-fzf
 # License: GNU General Public License Version 3 (https://www.gnu.org/licenses/gpl-3.0.html)
 # Depndencies:
@@ -14,7 +14,7 @@
 #   - youtube-dl (https://youtube-dl.org/)
 #   - youtube-comment-downloader (https://github.com/egbertbouman/youtube-comment-downloader)
 # 
-# Subscribed channels database is value of YOUTUBE_FZF_DATABASE environmental valuables
+# Subscribed channels database is value of YOUTUBE_FZF_DATABASE environmental variables
 # 
 # Usage:
 #   youtube-fzf
@@ -82,7 +82,7 @@ videos(){
     .contents.twoColumnBrowseResultsRenderer.tabs[]?
     .tabRenderer.content.sectionListRenderer.contents[]?
     .itemSectionRenderer.contents[]?
-    .gridRenderer.items[:-1][]?
+    .gridRenderer.items[]?
     .gridVideoRenderer                                                 |
     select(.videoId)                                                   |
       {
@@ -359,18 +359,10 @@ comments(){
   id="$(echo "$1" | sed 's!^https://www.youtube.com/watch?v=!!')"
   tmpfile="$(echo "$id" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
 
-  youtube-comment-downloader --youtubeid="$id" --output="$tmpfile" > /dev/null || return&
+  youtube-comment-downloader --youtubeid="$id" --output='/dev/stderr' 2>&1 1>/dev/null ||
+    echo 'You should install youtube-comment-downloader from https://github.com/egbertbouman/youtube-comment-downloader' >&2
   # Depend on youtube-comment-downloader: https://github.com/egbertbouman/youtube-comment-downloader
   # pip install https://github.com/egbertbouman/youtube-comment-downloader/archive/master.zip
-
-  limit=20
-  until [ -e "$tmpfile" ]; do
-    sleep 3
-    limit=$((limit-1))
-    [ "$limit" = 0 ] && break
-  done
-
-  less -F -- "$tmpfile"
 }
 
 fzf_videos(){
@@ -468,7 +460,7 @@ main(){
   if ! echo "$database" | grep -q '^/'; then
     database="`pwd`"/"$database"
   fi
-  tmp_dir="$(mktemp -dt "`basename $0`")" || exit 1
+  tmp_dir="${YOUTUBE_FZF_TMP:-$(mktemp -dt "$(basename "$0")")}" || exit 1
   cd "$tmp_dir" || exit 4
 
   option="$1"
@@ -483,10 +475,11 @@ main(){
     s/,.*//
     s/".*//
   '`"
-  if echo "$url" | grep -q -e 'youtube.com/c/' -e 'youtube.com/user/'; then
+  if echo "$url" | grep -q -e '^https://www.youtube.com/channel/' -e '^https://www.youtube.com/c/' -e '^https://www.youtube.com/user/' &&
+  ! echo "$url" | grep -q '^https://www.youtube.com/channel/[-[:alnum:]]\{24\}/\?$'; then
     tmpfile="$(echo "$url" | tr '/' ':')""`date +%Y%m%d%H%M%S`"
-    url='https://www.youtube.com/channel/'"$(
-      curl -s "$url"                                                     |
+    id="$(
+      curl -s "$url"                                                   |
       tee "$tmpfile"                                                   |
       sed -n '
         /.*\({"respon.*}\);.*/ {
@@ -498,6 +491,8 @@ main(){
       jq -r '.header.c4TabbedHeaderRenderer.channelId'
     )"
     sleep 1
+    if [ "$id" = '' ]; then exit 1; fi
+    url='https://www.youtube.com/channel/'"$id"
   fi
 
   case "$option" in
@@ -518,7 +513,7 @@ main(){
     --fzf-channels|-c)
       fzf_channels "$@"                                               ;;
     -s|--search)
-      search "$@" | fzf_videos                                        ;;
+      search "$@" | fzf_videos "$@"                                   ;;
     -q|--query)
       search "$@"                                                     ;;
     '')
@@ -535,7 +530,7 @@ Repository:   https://github.com/minamotorin/youtube-fzf
 License:      GNU General Public Lisence Version 3
               https://www.gnu.org/licenses/gpl-3.0.html
 
-Subscribed channels database (value of YOUTUBE_FZF_DATABASE environmental valuables):
+Subscribed channels database (value of YOUTUBE_FZF_DATABASE environmental variables):
   $database
 
 Usage:
