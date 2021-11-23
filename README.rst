@@ -1,4 +1,4 @@
-README Version 1.3.2
+README Version 1.3.3
 
 Abstract
 ########
@@ -143,13 +143,19 @@ TODO
   - More Reference
   - More Similar Projects (other than shell scripts)
   - More TODO
-  
+
 - Use variables with ``--data-raw``
+- Exit codes
+- Autocomplete
+- Support yt-dlp
+- Create test
 - Automatically Usage update
 - Make logo image
 - Yank in multi-platform
 - More options
 - More search results
+- Info of deleted videos
+- Support URL in description
 - Playlist support
 - Channel information
 - Custom search options
