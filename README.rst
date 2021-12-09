@@ -1,4 +1,6 @@
-README Version 1.3.3
+README Version 1.4
+
+.. contents::
 
 Abstract
 ########
@@ -8,7 +10,7 @@ Browse YouTube in CLI with fzf without YouTube Data API.
 NOTE
 ####
 
-I‘m beginner. This program will not work if YouTube changes things. And it will take long time to push fix.
+I'm beginner. This program will not work if YouTube changes things. And it will take long time to push fix.
 
 Some codes and English will wrong. If you find something, please use `Github issues <https://github.com/minamotorin/youtube-fzf/issues>`_ feel free.
 
@@ -32,12 +34,12 @@ Usage
       Womk with option
 
   :Options:
-    --videos URL			Channel‘s videos
-    --channels URL		Channel‘s urls
-    --watch URL			Video‘s information
-    --comments URS		Video‘s comments (depend on youtube-comment-downloader)
-    -v, --fzf-videos HEADER	fzf mode for list of video‘s url
-    -c, --fzf-channels HEADER	fzf mode for list of channel‘s url
+    --videos URL			Channel's videos
+    --channels URL		Channel's urls
+    --watch URL			Video's information
+    --comments URS		Video's comments (depend on youtube-comment-downloader)
+    -v, --fzf-videos HEADER	fzf mode for list of video's url
+    -c, --fzf-channels HEADER	fzf mode for list of channel's url
     -q, --query WORDS		Search videos from words
     -s, --search WORDS		Search videos from words and select in fzf mode
     -V, --version			Show version information
@@ -74,6 +76,25 @@ Usage
 TODO
   More informations
 
+Environmental variables
+***********************
+
+:``YOUTUBE_FZF_DATABASE``:
+  Subscribed channels database. The default is ``/dev/stdin``.
+
+:``YOUTUBE_FZF_TMP``:
+  For debugging, temporary files are created in ``$YOUTUBE_FZF_TMP``.
+  In default, temporary directory is created by ``mktemp``.
+
+:``YOUTUBE_FZF_VIDEOS``:
+  Custom fzf options for fzf-videos.
+
+:``YOUTUBE_FZF_CHANNELS``:
+  Custom fzf options for fzf-channels.
+
+:``YOUTUBE_FZF_LANG``:
+  Languages information for query. Support is still incomplete.
+
 Dependencies
 ############
 
@@ -107,7 +128,7 @@ Options
 Q&A
 ###
 
-:Why don‘t you use YouTube Data API?:
+:Why don't you use YouTube Data API?:
   Because of freedom. Use it if you want.
 
 Reference
@@ -126,9 +147,9 @@ Shell Script
   Good! Thumbnails, History, and some features will be useful. However, it seems that this script is not able to get videos from channels.
 
 :`yt <https\://github.com/sayan01/scripts/blob/master/yt>`_:
-  Require GNU grep but jqless. Not only channel‘s videos but also playlists. I haven‘t understood how to use.
+  Require GNU grep but jqless. Not only channel's videos but also playlists. I haven't understood how to use.
 
-If you know other similar projects, please let‘s me know.
+If you know other similar projects, please let's me know.
 
 TODO
 ####
@@ -144,6 +165,7 @@ TODO
   - More Similar Projects (other than shell scripts)
   - More TODO
 
+- Better languages support
 - Use variables with ``--data-raw``
 - Exit codes
 - Autocomplete
