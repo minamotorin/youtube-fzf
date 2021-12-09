@@ -2,7 +2,7 @@
 
 ####################
 # youtube-fzf: Browse YouTube in CLI with fzf without YouTube Data API.
-# Version: 1.4
+# Version: 1.5
 # Repository: https://github.com/minamotorin/youtube-fzf
 # License: GNU General Public License Version 3 (https://www.gnu.org/licenses/gpl-3.0.html)
 # Depndencies:
@@ -22,12 +22,12 @@
 #   youtube-fzf [OPTIONS]
 # 
 # Options:
-#   --videos URL		Channel‘s videos
-#   --channels URL		Channel‘s urls
-#   --watch URL			Video‘s information
-#   --comments URS		Video‘s comments (depend on youtube-comment-downloader)
-#   -v, --fzf-videos HEADER	fzf mode for list of video‘s url
-#   -c, --fzf-channels HEADER	fzf mode for list of channel‘s url
+#   --videos URL		Channel's videos
+#   --channels URL		Channel's urls
+#   --watch URL			Video's information
+#   --comments URS		Video's comments (depend on youtube-comment-downloader)
+#   -v, --fzf-videos HEADER	fzf mode for list of video's url
+#   -c, --fzf-channels HEADER	fzf mode for list of channel's url
 #   -q, --query WORDS		Search videos from words
 #   -s, --search WORDS		Search videos from words and select in fzf mode
 #   -V, --version		Show version information
@@ -60,7 +60,7 @@ videos(){
   #
 
   url="$1"/videos
-  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"_"$RANDOM"_videos
   channel="$(echo "$url" | sed -n '
     \!^https://www.youtube.com/channel/\([^/]*\)/videos$! {
         s//\1/
@@ -104,7 +104,7 @@ videos(){
       .tabRenderer.content.sectionListRenderer.contents[]?
       .itemSectionRenderer.contents[]?
       .gridRenderer.items[-1].continuationItemRenderer.continuationEndpoint.continuationCommand.token
-    ' 
+    '
   )"
 
   if ! [ "$2" = '-a' ]; then return; fi
@@ -116,7 +116,7 @@ videos(){
     #
 
     if [ "$token" = '' ]; then return; fi
-    tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+    tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"_"$RANDOM"_callapi
 
     curl -s 'https://www.youtube.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8' \
       -H 'authority: www.youtube.com' \
@@ -130,7 +130,7 @@ videos(){
       -H 'sec-fetch-mode: same-origin' \
       -H 'sec-fetch-dest: empty' \
       -H 'referer: https://www.youtube.com/channel/'"$channel"'/videos' \
-      --data-raw '{"context":{"client":{"visitorData":"","userAgent":"","clientName":"WEB","clientVersion":"2.20210429.07.00","originalUrl":"https://www.youtube.com/channel/'"$channel"'/videos","platform":"DESKTOP","clientFormFactor":"UNKNOWN_FORM_FACTOR","userInterfaceTheme":"USER_INTERFACE_THEME_DARK","connectionType":"CONN_CELLULAR_4G","mainAppWebInfo":{"graftUrl":"https://www.youtube.com/channel/'"$channel"'/videos","webDisplayMode":"WEB_DISPLAY_MODE_BROWSER"}},"user":{"lockedSafetyMode":false},"request":{"useSsl":true,"internalExperimentFlags":[],"consistencyTokenJars":[]},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"continuation":"'"$1"'"}' \
+      --data-raw '{"context":{"client":{'"$lang"'"visitorData":"","userAgent":"","clientName":"WEB","clientVersion":"2.20210429.07.00","originalUrl":"https://www.youtube.com/channel/'"$channel"'/videos","platform":"DESKTOP","clientFormFactor":"UNKNOWN_FORM_FACTOR","userInterfaceTheme":"USER_INTERFACE_THEME_DARK","connectionType":"CONN_CELLULAR_4G","mainAppWebInfo":{"graftUrl":"https://www.youtube.com/channel/'"$channel"'/videos","webDisplayMode":"WEB_DISPLAY_MODE_BROWSER"}},"user":{"lockedSafetyMode":false},"request":{"useSsl":true,"internalExperimentFlags":[],"consistencyTokenJars":[]},"clientScreenNonce":"","clickTracking":{"clickTrackingParams":""}},"continuation":"'"$1"'"}' \
       --compressed                                                     |
     tee "$tmpfile"                                                     |
     jq -c '
@@ -167,7 +167,7 @@ channels(){
   #
 
   url="$1"/channels
-  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"_"$RANDOM"_channels
   channel="$(echo "$url" | sed -n '
     \!^https://www.youtube.com/channel/\([^/]*\)/channels$! {
         s//\1/
@@ -221,7 +221,7 @@ channels(){
     # callapi 'token'
     #
 
-    tmpfile="`echo "$url" | tr '/' '_'`""`date +%Y%m%d%H%M%S`"
+    tmpfile="`echo "$url" | tr '/' '_'`""`date +%Y%m%d%H%M%S`"_"$RANDOM"_callapi
 
     curl -s 'https://www.youtube.com/youtubei/v1/browse?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8' \
       -H 'authority: www.youtube.com' \
@@ -272,7 +272,7 @@ watch(){
   #
 
   url="$1"
-  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"_"$RANDOM"_watch
   curl -s "$url" -o "$tmpfile"
   cat "$tmpfile" |
   sed -n '
@@ -357,7 +357,7 @@ comments(){
   #
 
   id="$(echo "$1" | sed 's!^https://www.youtube.com/watch?v=!!')"
-  tmpfile="$(echo "$id" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+  tmpfile="$(echo "$id" | tr '/' '_')""`date +%Y%m%d%H%M%S`"_"$RANDOM"_comments
 
   youtube-comment-downloader --youtubeid="$id" --output='/dev/stderr' 2>&1 1>/dev/null ||
     echo 'You should install youtube-comment-downloader from https://github.com/egbertbouman/youtube-comment-downloader' >&2
@@ -387,6 +387,7 @@ fzf_videos(){
     --bind up:page-up
     --bind down:page-down
     --preview sh\ \"$0\"\ --watch\ \"{}\"
+    $YOUTUBE_FZF_VIDEOS
 "
 
   fzf --header="$header"
@@ -412,6 +413,7 @@ fzf_channels(){
     --bind up:page-up
     --bind down:page-down
     --preview sh\ \"$0\"\ --videos\ \"{}\"
+    $YOUTUBE_FZF_CHANNELS
   "
 
   fzf --header="$header"
@@ -425,7 +427,7 @@ search(){
   #
 
   url='https://www.youtube.com/results?search_query='"$(echo "$@" | jq -sRr @uri)"
-  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"
+  tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`"_"$RANDOM"_search
 
   curl -s "$url"                                                       |
   tee "$tmpfile"                                                       |
@@ -463,6 +465,10 @@ main(){
   tmp_dir="${YOUTUBE_FZF_TMP:-$(mktemp -dt "$(basename "$0")")}" || exit 1
   cd "$tmp_dir" || exit 4
 
+  if ! [ "$YOUTUBE_FZF_LANG" = '' ]; then
+    lang="\"hl\":\"$YOUTUBE_FZF_LANG\","
+  fi
+
   option="$1"
   shift
   if [ "$1" = '-a' ]; then
@@ -477,12 +483,12 @@ main(){
   '`"
   if echo "$url" | grep -q -e '^https://www.youtube.com/channel/' -e '^https://www.youtube.com/c/' -e '^https://www.youtube.com/user/' &&
   ! echo "$url" | grep -q '^https://www.youtube.com/channel/[-[:alnum:]]\{24\}/\?$'; then
-    tmpfile="$(echo "$url" | tr '/' ':')""`date +%Y%m%d%H%M%S`"
+    tmpfile="$(echo "$url" | tr '/' '_')""`date +%Y%m%d%H%M%S`_GetChannelId"
     id="$(
       curl -s "$url"                                                   |
       tee "$tmpfile"                                                   |
       sed -n '
-        /.*\({"respon.*}\);.*/ {
+        /.*\({"respon.*}\);<\/script>.*/ {
           s//\1/
           p
           q
@@ -539,12 +545,12 @@ Usage:
   `basename "$0"` [OPTIONS]
 
 Options:
-  --videos URL			Channel‘s videos
-  --channels URL		Channel‘s urls
-  --watch URL			Video‘s information
-  --comments URS		Video‘s comments (depend on youtube-comment-downloader)
-  -v, --fzf-videos HEADER	fzf mode for list of video‘s url
-  -c, --fzf-channels HEADER	fzf mode for list of channel‘s url
+  --videos URL			Channel's videos
+  --channels URL		Channel's urls
+  --watch URL			Video's information
+  --comments URS		Video's comments (depend on youtube-comment-downloader)
+  -v, --fzf-videos HEADER	fzf mode for list of video's url
+  -c, --fzf-channels HEADER	fzf mode for list of channel's url
   -q, --query WORDS		Search videos from words
   -s, --search WORDS		Search videos from words and select in fzf mode
   -V, --version			Show version information
