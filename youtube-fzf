@@ -2,7 +2,7 @@
 
 ####################
 # youtube-fzf: Browse YouTube in CLI with fzf without YouTube Data API.
-# Version: 1.5
+# Version: 1.5.1
 # Repository: https://github.com/minamotorin/youtube-fzf
 # License: GNU General Public License Version 3 (https://www.gnu.org/licenses/gpl-3.0.html)
 # Depndencies:
@@ -525,9 +525,7 @@ main(){
     '')
       cat "$database" | fzf_channels "$database"                      ;;
     -V|--version)
-      cat <<EOF
-1.3
-EOF
+      sed -n '/^# Version: \(.*\)/{s//\1/p; q;}' "$0"
                                                                       ;;
     -h|--help)
       cat <<EOF
