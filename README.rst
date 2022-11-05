@@ -1,4 +1,4 @@
-README Version 1.4
+README Version 1.5
 
 .. contents::
 
@@ -35,6 +35,8 @@ Usage
 
   :Options:
     --videos URL			Channel's videos
+    --lives URL			Channel's stream archives
+    --shorts URL			Channel's shorts
     --channels URL		Channel's urls
     --watch URL			Video's information
     --comments URS		Video's comments (depend on youtube-comment-downloader)
@@ -87,10 +89,10 @@ Environmental variables
   In default, temporary directory is created by ``mktemp``.
 
 :``YOUTUBE_FZF_VIDEOS``:
-  Custom fzf options for fzf-videos.
+  Custom fzf options for fzf-videos. Overwrites default key bindings.
 
 :``YOUTUBE_FZF_CHANNELS``:
-  Custom fzf options for fzf-channels.
+  Custom fzf options for fzf-channels. Overwrites default key bindings.
 
 :``YOUTUBE_FZF_LANG``:
   Languages information for query. Support is still incomplete.
@@ -165,6 +167,7 @@ TODO
   - More Similar Projects (other than shell scripts)
   - More TODO
 
+- Watch videos without youtube-dl
 - Better languages support
 - Use variables with ``--data-raw``
 - Exit codes
